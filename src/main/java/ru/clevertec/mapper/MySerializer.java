@@ -2,8 +2,8 @@ package ru.clevertec.mapper;
 
 import ru.clevertec.entity.Faculty;
 
-public interface MySerializer<T> {
+public interface MySerializer {
 
-    String fromEntityToJson(T entity);
-    T fromJsonToEntity(String json);
+    String fromEntityToJson(Object entity);
+    Object fromJsonToEntity(String json);
 }
