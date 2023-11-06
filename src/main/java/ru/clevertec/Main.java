@@ -1,5 +1,6 @@
 package ru.clevertec;
 
+import ru.clevertec.entity.Department;
 import ru.clevertec.entity.Speciality;
 import ru.clevertec.entity.Subject;
 import ru.clevertec.entity.Teacher;
@@ -7,6 +8,7 @@ import ru.clevertec.mapper.MySerializer;
 import ru.clevertec.mapper.MySerializerImpl;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -27,6 +29,11 @@ public class Main {
         Subject subject = new Subject(UUID.randomUUID(), "Programming", Map.of(1,speciality, 2, speciality));
         result = serializer.fromEntityToJson(subject);
         System.out.println("Subject");
+        System.out.println(result);
+
+        Department department = new Department(UUID.randomUUID(), "Application programming", Map.of(subject, List.of(teacher, teacher)));
+        result = serializer.fromEntityToJson(department);
+        System.out.println("Department");
         System.out.println(result);
 
     }

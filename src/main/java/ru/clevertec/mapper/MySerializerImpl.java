@@ -4,10 +4,9 @@ package ru.clevertec.mapper;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.time.temporal.TemporalAccessor;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 public class MySerializerImpl implements MySerializer {
 
@@ -45,7 +44,7 @@ public class MySerializerImpl implements MySerializer {
         StringBuilder result = new StringBuilder();
         if (checkInstanceCommonType(obj)) {
             result.append(makeSimpleFormat(obj));
-        } else if (obj instanceof Collection) {
+        } else if (obj instanceof List) {
             result.append(makeListFormat(obj));
         } else if (obj instanceof Map) {
             result.append(makeMapFormat(obj));
@@ -68,8 +67,8 @@ public class MySerializerImpl implements MySerializer {
     public String makeMapFormat(Object obj) {
         StringBuilder jsonStringResult = new StringBuilder();
         jsonStringResult.append("{\n");
-        ((Map<?, ?>) obj).entrySet().stream().map(
-                el -> {
+        ((Map<?, ?>) obj).entrySet().stream()
+                .map(el -> {
                     StringBuilder temp = new StringBuilder();
                     Object key = el.getKey();
                     Object value = el.getValue();
@@ -77,8 +76,8 @@ public class MySerializerImpl implements MySerializer {
                     temp.append(" : ");
                     temp.append(makeFormat(value));
                     return temp;
-                }
-        ).forEach(el -> jsonStringResult.append(el).append(",\n"));
+                })
+                .forEach(el -> jsonStringResult.append(el).append(",\n"));
         jsonStringResult.deleteCharAt(jsonStringResult.lastIndexOf(","));
         jsonStringResult.append("}");
         return jsonStringResult.toString();
@@ -87,9 +86,12 @@ public class MySerializerImpl implements MySerializer {
     public String makeListFormat(Object obj) {
         StringBuilder jsonStringResult = new StringBuilder();
         jsonStringResult.append("[\n");
-        jsonStringResult.append(fromEntityToJson(obj));
+        ((List<?>) obj).stream()
+                .map(this::makeFormat)
+                .forEach(el -> jsonStringResult.append(el).append(",\n"));
+        jsonStringResult.deleteCharAt(jsonStringResult.lastIndexOf(","));
         jsonStringResult.append("]");
-        return null;
+        return jsonStringResult.toString();
     }
 
     public String makeUserDataTypeFormat(Object obj) {
