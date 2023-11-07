@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class Subject {
     private UUID id;
     private String nameSubject;
-    private Map<Speciality, Integer> specialityWithNumberOfCourse;
+    private Map<Integer, Speciality> specialityWithNumberOfCourse;
 }
