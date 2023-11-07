@@ -1,5 +1,6 @@
 package ru.clevertec.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,7 @@ public class Teacher {
     private String lastName;
     private String firstName;
     private String phoneNumber;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
     private int experience;
 }

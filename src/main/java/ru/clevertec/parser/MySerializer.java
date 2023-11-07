@@ -1,6 +1,4 @@
-package ru.clevertec.mapper;
-
-import ru.clevertec.entity.Faculty;
+package ru.clevertec.parser;
 
 public interface MySerializer {
 

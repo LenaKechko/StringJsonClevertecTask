@@ -1,4 +1,4 @@
-package ru.clevertec.mapper;
+package ru.clevertec.parser;
 
 
 import java.lang.reflect.Field;
@@ -12,7 +12,7 @@ public class MySerializerImpl implements MySerializer {
 
     @Override
     public String fromEntityToJson(Object entity) {
-        StringBuilder jsonString = new StringBuilder("{\n");
+        StringBuilder jsonString = new StringBuilder("{");
         Field[] fieldsOfEntity = entity.getClass().getDeclaredFields();
         int countFields = fieldsOfEntity.length;
         for (Field currentField : fieldsOfEntity) {
@@ -20,12 +20,11 @@ public class MySerializerImpl implements MySerializer {
                 currentField.setAccessible(true);
             try {
                 String nameField = currentField.getName();
-                jsonString.append(String.format("\t\"%s\" : ", nameField));
+                jsonString.append(String.format("\"%s\" : ", nameField));
                 Object valueField = currentField.get(entity);
                 jsonString.append(makeFormat(valueField));
                 countFields--;
                 if (countFields != 0) jsonString.append(",");
-                jsonString.append("\n");
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
@@ -66,18 +65,18 @@ public class MySerializerImpl implements MySerializer {
 
     public String makeMapFormat(Object obj) {
         StringBuilder jsonStringResult = new StringBuilder();
-        jsonStringResult.append("{\n");
+        jsonStringResult.append("{");
         ((Map<?, ?>) obj).entrySet().stream()
                 .map(el -> {
                     StringBuilder temp = new StringBuilder();
                     Object key = el.getKey();
                     Object value = el.getValue();
-                    temp.append(makeFormat(key));
+                    temp.append("\"").append(key).append("\"");
                     temp.append(" : ");
                     temp.append(makeFormat(value));
                     return temp;
                 })
-                .forEach(el -> jsonStringResult.append(el).append(",\n"));
+                .forEach(el -> jsonStringResult.append(el).append(","));
         jsonStringResult.deleteCharAt(jsonStringResult.lastIndexOf(","));
         jsonStringResult.append("}");
         return jsonStringResult.toString();
@@ -85,10 +84,10 @@ public class MySerializerImpl implements MySerializer {
 
     public String makeListFormat(Object obj) {
         StringBuilder jsonStringResult = new StringBuilder();
-        jsonStringResult.append("[\n");
+        jsonStringResult.append("[");
         ((List<?>) obj).stream()
                 .map(this::makeFormat)
-                .forEach(el -> jsonStringResult.append(el).append(",\n"));
+                .forEach(el -> jsonStringResult.append(el).append(","));
         jsonStringResult.deleteCharAt(jsonStringResult.lastIndexOf(","));
         jsonStringResult.append("]");
         return jsonStringResult.toString();
