@@ -45,7 +45,7 @@ class MySerializerImplTest {
     @Test
     void fromEntityToJsonShouldReturnStringByTeacherObject() throws JsonProcessingException, JSONException {
         // given
-        Teacher teacher = new Teacher(UUID.randomUUID(), "Surname", "Name", "8-029-111-11-11", LocalDate.now(), 5);
+        Teacher teacher = new Teacher(UUID.randomUUID(), "Surname", "Name", "8-029-111-11-11", LocalDate.now(), false, 5);
         String expected = mySerializer.fromEntityToJson(teacher);
 
         // when
@@ -75,8 +75,8 @@ class MySerializerImplTest {
         Speciality speciality = new Speciality(UUID.randomUUID(), "Some speciality");
         Subject subject = new Subject(UUID.randomUUID(), "Name subject", Map.of(1, speciality));
 
-        Teacher teacher1 = new Teacher(UUID.randomUUID(), "Surname1", "Name1", "8-029-111-11-11", LocalDate.now(), 5);
-        Teacher teacher2 = new Teacher(UUID.randomUUID(), "Surname2", "Name2", "8-029-111-11-11", LocalDate.now(), 20);
+        Teacher teacher1 = new Teacher(UUID.randomUUID(), "Surname1", "Name1", "8-029-111-11-11", LocalDate.now(), false, 5);
+        Teacher teacher2 = new Teacher(UUID.randomUUID(), "Surname2", "Name2", "8-029-111-11-11", LocalDate.now(), true, 20);
 
         Department department = new Department(UUID.randomUUID(), "Name department", Map.of(subject, List.of(teacher1, teacher2)));
 
@@ -95,8 +95,8 @@ class MySerializerImplTest {
         Speciality speciality = new Speciality(UUID.randomUUID(), "Some speciality");
         Subject subject = new Subject(UUID.randomUUID(), "Name subject", Map.of(1, speciality));
 
-        Teacher teacher1 = new Teacher(UUID.randomUUID(), "Surname1", "Name1", "8-029-111-11-11", LocalDate.now(), 5);
-        Teacher teacher2 = new Teacher(UUID.randomUUID(), "Surname2", "Name2", "8-029-111-11-11", LocalDate.now(), 20);
+        Teacher teacher1 = new Teacher(UUID.randomUUID(), "Surname1", "Name1", "8-029-111-11-11", LocalDate.now(), false, 5);
+        Teacher teacher2 = new Teacher(UUID.randomUUID(), "Surname2", "Name2", "8-029-111-11-11", LocalDate.now(), true, 20);
 
         Department department = new Department(UUID.randomUUID(), "Name department", Map.of(subject, List.of(teacher1, teacher2)));
 

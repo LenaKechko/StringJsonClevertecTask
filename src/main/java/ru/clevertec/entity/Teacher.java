@@ -18,5 +18,6 @@ public class Teacher {
     private String phoneNumber;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
+    private boolean single;
     private int experience;
 }

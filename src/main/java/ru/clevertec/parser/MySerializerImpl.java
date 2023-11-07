@@ -3,6 +3,8 @@ package ru.clevertec.parser;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.time.OffsetTime;
+import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAccessor;
 import java.util.List;
 import java.util.Map;
@@ -34,8 +36,9 @@ public class MySerializerImpl implements MySerializer {
         return jsonString.toString();
     }
 
+    /*валидация json*/
     @Override
-    public Object fromJsonToEntity(String json) {
+    public Object fromJsonToEntity(String json) {//}, T className) {
         return null;
     }
 
@@ -57,6 +60,8 @@ public class MySerializerImpl implements MySerializer {
             jsonString.append(String.format("%d", (Integer) obj));
         } else if (obj instanceof Double) {
             jsonString.append(String.format("%.2f", (Double) obj));
+        } else if (obj instanceof Boolean) {
+            jsonString.append((Boolean) obj);
         } else if (obj instanceof String || obj instanceof UUID || obj instanceof TemporalAccessor) {
             jsonString.append(String.format("\"%s\"", obj));
         }
@@ -99,6 +104,6 @@ public class MySerializerImpl implements MySerializer {
 
     public boolean checkInstanceCommonType(Object obj) {
         return (obj instanceof Number || obj instanceof String || obj instanceof UUID
-                || obj instanceof TemporalAccessor);
+                || obj instanceof TemporalAccessor || obj instanceof Boolean);
     }
 }

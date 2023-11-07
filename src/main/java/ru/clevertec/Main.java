@@ -30,7 +30,7 @@ public class Main {
         System.out.println(result);
 
         Teacher teacher = new Teacher(UUID.randomUUID(), "Kechko", "Elena", "8-029-179-81-96",
-                LocalDate.of(1991, 12, 7), 6);
+                LocalDate.of(1991, 12, 7), true, 6);
         result = serializer.fromEntityToJson(teacher);
         System.out.println("Teacher");
         System.out.println(result);
