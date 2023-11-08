@@ -1,4 +1,4 @@
-package ru.clevertec.parser;
+package ru.clevertec.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

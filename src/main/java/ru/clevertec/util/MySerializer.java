@@ -1,4 +1,4 @@
-package ru.clevertec.parser;
+package ru.clevertec.util;
 
 public interface MySerializer {
 

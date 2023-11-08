@@ -7,8 +7,8 @@ import ru.clevertec.entity.Speciality;
 import ru.clevertec.entity.Subject;
 import ru.clevertec.entity.Teacher;
 import ru.clevertec.entity.Faculty;
-import ru.clevertec.parser.MySerializer;
-import ru.clevertec.parser.MySerializerImpl;
+import ru.clevertec.util.MySerializer;
+import ru.clevertec.util.MySerializerImpl;
 
 import java.time.LocalDate;
 import java.util.List;
