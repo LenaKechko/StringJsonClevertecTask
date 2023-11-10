@@ -4,13 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.clevertec.entity.Department;
 import ru.clevertec.entity.Speciality;
 import ru.clevertec.entity.Subject;
 import ru.clevertec.entity.Teacher;
 
 import java.lang.reflect.InvocationTargetException;
-import java.text.SimpleDateFormat;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -79,6 +78,29 @@ class MySerializerImplTest {
 
         // when
         Subject actual = (Subject) serializer.fromJsonToEntity(jsonString, Subject.class);
+
+        // then
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void fromJsonToEntityShouldReturnDepartmentObject() throws JsonProcessingException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        // given
+        UUID uuidSubject = UUID.randomUUID();
+        UUID uuidSpecialityFirst = UUID.randomUUID();
+        UUID uuidSpecialitySecond = UUID.randomUUID();
+        String jsonString = "{\"id\" : \"" + uuidSubject + "\", " +
+                "\"nameSubject\" : \"Graphics\", " +
+                "\"specialityWithNumberOfCourse\" : " +
+                "{\"1\" : {\"id\" : \"" + uuidSpecialityFirst + "\", \"name\" : \"Name speciality1\"}, " +
+                "\"2\" : {\"id\" : \"" + uuidSpecialitySecond + "\", \"name\" : \"Name speciality2\"}" +
+                "}}";
+        ObjectMapper objectMapper = new ObjectMapper();
+        Department expected = objectMapper.readValue(jsonString, Department.class);
+        System.out.println(expected);
+
+        // when
+        Department actual = (Department) serializer.fromJsonToEntity(jsonString, Department.class);
 
         // then
         assertEquals(expected, actual);

@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 
 public class MySerializerImpl implements MySerializer {
     private static final Pattern pattern = Pattern.compile("(\"\\b\\w+\" ?: ?\"?[\\w. \\-,]+\\b\"?)" +
-            "|(\"\\w+\" ?: ?\\[\\{[\\w \"\\-,:]+\\}\\])" +
+            "|(\"\\w+\" ?: ?\\[\\{[\\w \"\\-,:]+\\}])" +
             "|(\"\\w+\" ?: ?\\{[\\w \\-\",:]+\\})" +
-            "|(\"\\w+\" ?: ?\\{[\\{\\}\\w \\-\",:]+\\})");
+            "|(\"\\w+\" ?: ?\\{[{}\\w \\-\",:]+\\})");
 
     @Override
     public String fromEntityToJson(Object entity) {
@@ -74,7 +74,7 @@ public class MySerializerImpl implements MySerializer {
         };
     }
 
-    public Object returnValueByParametrizedType(ParameterizedType type, Object value) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public Object returnValueByParametrizedType(ParameterizedType type, Object value) {
         String nameType = type.getRawType().getTypeName();
         if (nameType.contains("Map")) {
             Map<String, Object> parse = getStringObjectMap((String) value);
