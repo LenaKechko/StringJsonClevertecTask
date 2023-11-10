@@ -5,13 +5,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.clevertec.entity.Department;
+import ru.clevertec.entity.Faculty;
 import ru.clevertec.entity.Speciality;
 import ru.clevertec.entity.Subject;
 import ru.clevertec.entity.Teacher;
+import ru.clevertec.util.SerializeKey.JacksonModule;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MySerializerImplTest {
@@ -74,7 +79,6 @@ class MySerializerImplTest {
                 "}}";
         ObjectMapper objectMapper = new ObjectMapper();
         Subject expected = objectMapper.readValue(jsonString, Subject.class);
-        System.out.println(expected);
 
         // when
         Subject actual = (Subject) serializer.fromJsonToEntity(jsonString, Subject.class);
@@ -86,28 +90,61 @@ class MySerializerImplTest {
     @Test
     void fromJsonToEntityShouldReturnDepartmentObject() throws JsonProcessingException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         // given
+        UUID uuidTeacher = UUID.randomUUID();
+        UUID uuidDepartment = UUID.randomUUID();
         UUID uuidSubject = UUID.randomUUID();
-        UUID uuidSpecialityFirst = UUID.randomUUID();
-        UUID uuidSpecialitySecond = UUID.randomUUID();
-        String jsonString = "{\"id\" : \"" + uuidSubject + "\", " +
-                "\"nameSubject\" : \"Graphics\", " +
-                "\"specialityWithNumberOfCourse\" : " +
-                "{\"1\" : {\"id\" : \"" + uuidSpecialityFirst + "\", \"name\" : \"Name speciality1\"}, " +
-                "\"2\" : {\"id\" : \"" + uuidSpecialitySecond + "\", \"name\" : \"Name speciality2\"}" +
-                "}}";
+        UUID uuidSpeciality = UUID.randomUUID();
+        String jsonString = "{\"id\" : \"" + uuidDepartment + "\", \"name\" : \"Application programming\", " +
+                "\"subjectAndAssociationTeacher\" : {\"Subject(id=" + uuidSubject + ", nameSubject=Programming, " +
+                "specialityWithNumberOfCourse=" +
+                "{1=Speciality(id=" + uuidSpeciality + ", name=math)})\" : " +
+                "[{\"id\" : \"" + uuidTeacher + "\", \"lastName\" : \"Kechko\", \"firstName\" : \"Elena\", " +
+                "\"phoneNumber\" : \"8-029-179-81-96\", \"birthday\" : \"1991-12-07\", \"single\" : true, \"experience\" : 6}]}}";
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JacksonModule());
         Department expected = objectMapper.readValue(jsonString, Department.class);
-        System.out.println(expected);
 
         // when
         Department actual = (Department) serializer.fromJsonToEntity(jsonString, Department.class);
 
         // then
-        assertEquals(expected, actual);
+        assertThat(actual)
+                .hasFieldOrPropertyWithValue(Department.Fields.id, expected.getId())
+                .hasFieldOrPropertyWithValue(Department.Fields.name, expected.getName());
+
+        Map<Subject, List<Teacher>> expectedMap = expected.getSubjectAndAssociationTeacher();
+        Map<Subject, List<Teacher>> actualMap = actual.getSubjectAndAssociationTeacher();
+        assertThat(actualMap.keySet())
+                .hasSameSizeAs(expectedMap.keySet());
+        assertThat(actualMap.values())
+                .hasSameElementsAs(expectedMap.values());
     }
 
-//    {"id" : "3da5e459-4ae8-4588-98a2-64ee2472494b","nameSubject" : "Name subject",
-//    "specialityWithNumberOfCourse" :
-//    {"2" : {"id" : "3fe79e84-4544-4a5a-9ef6-4462b0dd01be","name" : "Some speciality"},
-//    "1" : {"id" : "3fe79e84-4544-4a5a-9ef6-4462b0dd01be","name" : "Some speciality"}}}
+    @Test
+    void fromJsonToEntityShouldReturnFacultyObject() throws JsonProcessingException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        // given
+        UUID uuidFaculty = UUID.randomUUID();
+        UUID uuidTeacher = UUID.randomUUID();
+        UUID uuidDepartment = UUID.randomUUID();
+        UUID uuidSubject = UUID.randomUUID();
+        UUID uuidSpeciality = UUID.randomUUID();
+        String jsonString = "{\"id\" : \"" + uuidFaculty + "\",\"name\" : \"Mathematics\"," +
+                "\"departmentList\" : [{\"id\" : \"" + uuidDepartment + "\",\"name\" : \"Application programming\"," +
+                "\"subjectAndAssociationTeacher\" : {\"Subject(id=" + uuidSubject + ", nameSubject=Programming, " +
+                "specialityWithNumberOfCourse={1=Speciality(id=" + uuidSpeciality + ", name=math)})\" : " +
+                "[{\"id\" : \"" + uuidTeacher + "\",\"lastName\" : \"Kechko\",\"firstName\" : \"Elena\",\"phoneNumber\" : \"8-029-179-81-96\",\"birthday\" : \"1991-12-07\",\"single\" : true,\"experience\" : 6}]}}]}";
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JacksonModule());
+        Faculty expected = objectMapper.readValue(jsonString, Faculty.class);
+
+        // when
+        Faculty actual = (Faculty) serializer.fromJsonToEntity(jsonString, Faculty.class);
+
+        // then
+        assertThat(actual)
+                .hasFieldOrPropertyWithValue(Faculty.Fields.id, expected.getId())
+                .hasFieldOrPropertyWithValue(Faculty.Fields.name, expected.getName());
+        assertThat(actual.getDepartmentList())
+                .hasSameSizeAs(expected.getDepartmentList());
+    }
 }

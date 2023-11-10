@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +22,11 @@ public class MySerializerImpl implements MySerializer {
     private static final Pattern pattern = Pattern.compile("(\"\\b\\w+\" ?: ?\"?[\\w. \\-,]+\\b\"?)" +
             "|(\"\\w+\" ?: ?\\[\\{[\\w \"\\-,:]+\\}])" +
             "|(\"\\w+\" ?: ?\\{[\\w \\-\",:]+\\})" +
-            "|(\"\\w+\" ?: ?\\{[{}\\w \\-\",:]+\\})");
+            "|(\"\\w+\" ?: ?\\{[{}\\w \\-\",:]+\\})" +
+            "|(\"\\w+\" ?: ?\\{[{()}\\[\\]\\w= \\-\",:]+\\})" +
+            "|(\"[\\w =\\-(){},]+\" ?: ?\\[\\{[{()}\\[\\]\\w= \\-\",:]+\\}\\])");
+
+    private static final Pattern patternList = Pattern.compile("\\{[\\[\\](){}\\w= \\-\",:]+\\}");
 
     @Override
     public String fromEntityToJson(Object entity) {
@@ -52,12 +57,52 @@ public class MySerializerImpl implements MySerializer {
         return parseJson;
     }
 
+    private static List<Object> getStringObjectList(String json) {
+        Matcher matcher = patternList.matcher(json);
+        List<Object> parseJson = new ArrayList<>();
+        while (matcher.find()) {
+            parseJson.add(matcher.group());
+        }
+        return parseJson;
+    }
+
+    private static Map<String, Object> getStringObjectEntity(String json, Class<?> classObject) {
+        int countOfFields = classObject.getDeclaredFields().length;
+        json = json.substring(classObject.getSimpleName().length() + 1);
+        if (json.endsWith(")") || json.endsWith("}")) {
+            json = json.substring(0, json.length() - 1);
+        }
+        return Arrays.stream(json.split(", ", countOfFields))
+                .map(el -> {
+                            String[] keyValue = el.split("=", 2);
+                            String key = keyValue[0];
+                            String value = keyValue[1];
+                            return Map.entry(key, value);
+                        }
+                ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private static Map<String, Object> getStringObjectEntityMap(String json) {
+        json = json.substring(1, json.length() - 1);
+        return Arrays.stream(json.split("\\), "))
+                .map(el -> {
+                            String[] keyValue = el.split("=", 2);
+                            String key = keyValue[0];
+                            String value = keyValue[1];
+                            return Map.entry(key, value);
+                        }
+                ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
     public Object returnValueByType(Type type, Object value) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         if (type instanceof ParameterizedType typeMap) {
             return returnValueByParametrizedType(typeMap, value);
         }
         if (type.getTypeName().contains("ru.clevertec.entity")) {
             Map<String, Object> parse = getStringObjectMap((String) value);
+            if (parse.isEmpty()) {
+                parse = getStringObjectEntity((String) value, ((Class<?>) type));
+            }
             return makeMyEntity(parse, ((Class<?>) type));
         }
         String nameType = ((Class<?>) type).getSimpleName();
@@ -78,11 +123,14 @@ public class MySerializerImpl implements MySerializer {
         String nameType = type.getRawType().getTypeName();
         if (nameType.contains("Map")) {
             Map<String, Object> parse = getStringObjectMap((String) value);
+            if (parse.isEmpty()) parse = getStringObjectEntityMap((String) value);
             return makeMap(parse, type);
-        } else if (nameType.contains("List")) return null;
+        } else if (nameType.contains("List")) {
+            List<Object> parse = getStringObjectList((String) value);
+            return makeList(parse, type.getActualTypeArguments()[0]);
+        }
         return null;
     }
-
 
     public Object makeMyEntity(Map<String, Object> parseJson, Class<?> className) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Method[] methods = className.getMethods();
@@ -101,10 +149,7 @@ public class MySerializerImpl implements MySerializer {
                     .findFirst()
                     .orElseThrow();
             try {
-//                    Class<?> parameterTypesInSetter = myMethod.getParameterTypes()[0];
                 Type fieldType = className.getDeclaredField(key).getGenericType();
-//                    Field field = className.getDeclaredField(key);
-//                    String myFieldType = field.getType().;
                 value = returnValueByType(fieldType, value);
                 myMethod.invoke(myObject, value);
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException |
@@ -132,5 +177,16 @@ public class MySerializerImpl implements MySerializer {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-
+    public Object makeList(List<Object> parseJson, Type type) {
+        return parseJson.stream()
+                .map(el -> {
+                    try {
+                        return returnValueByType(type, el);
+                    } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
+                             IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList());
+    }
 }
