@@ -27,7 +27,6 @@ public class Validator {
 
     public static boolean isValidQuote(String input) {
         int countQuote = input.split("\"").length - 1;
-        System.out.println(countQuote);
         return (countQuote % 2 == 0);
     }
 }

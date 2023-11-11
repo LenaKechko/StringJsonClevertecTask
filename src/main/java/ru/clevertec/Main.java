@@ -7,20 +7,11 @@ import ru.clevertec.entity.Subject;
 import ru.clevertec.entity.Teacher;
 import ru.clevertec.util.MySerializer;
 import ru.clevertec.util.MySerializerImpl;
-import ru.clevertec.util.Validator;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ru.clevertec.entity.Department;
-import ru.clevertec.entity.Speciality;
-import ru.clevertec.entity.Subject;
-import ru.clevertec.entity.Teacher;
-import ru.clevertec.entity.Faculty;
-import ru.clevertec.util.MySerializer;
-import ru.clevertec.util.MySerializerImpl;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,6 +20,8 @@ import java.util.UUID;
 
 public class Main {
     public static void main(String[] args) throws JsonProcessingException {
+
+        //----сериализация----
         Speciality speciality = new Speciality(UUID.randomUUID(), "math");
         MySerializer serializer = new MySerializerImpl();
         String result = serializer.fromEntityToJson(speciality);
@@ -47,7 +40,7 @@ public class Main {
         System.out.println("Teacher");
         System.out.println(result);
 
-        Subject subject = new Subject(UUID.randomUUID(), "Programming", Map.of(1,speciality, 2, speciality));
+        Subject subject = new Subject(UUID.randomUUID(), "Programming", Map.of(1, speciality, 2, speciality));
         result = serializer.fromEntityToJson(subject);
         System.out.println("Subject");
         System.out.println(result);
@@ -67,17 +60,18 @@ public class Main {
 
         System.out.println("Faculty");
         System.out.println(result);
-    public static void main(String[] args) {
+
+        //----десериализация----
         UUID uuid = UUID.randomUUID();
         String jsonString = "{\"id\" :\"" + uuid +
                 "\", \"name\" : \"Name speciality\"}";
-        MySerializer serializer = new MySerializerImpl();
 
         try {
-            Speciality speciality = (Speciality) serializer.fromJsonToEntity(jsonString, Speciality.class);
+            speciality = (Speciality) serializer.fromJsonToEntity(jsonString, Speciality.class);
             System.out.println("-----Speciality Object from JSON------");
             System.out.println(speciality);
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | InstantiationException |
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                 InstantiationException |
                  IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -91,10 +85,11 @@ public class Main {
                 "\"experience\" : 5}";
 
         try {
-            Teacher teacher = (Teacher) serializer.fromJsonToEntity(jsonString, Teacher.class);
+            teacher = (Teacher) serializer.fromJsonToEntity(jsonString, Teacher.class);
             System.out.println("-----Teacher Object from JSON------");
             System.out.println(teacher);
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | InstantiationException |
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                 InstantiationException |
                  IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -108,10 +103,11 @@ public class Main {
                 "{\"1\" : {\"id\" : \"" + uuidSpecialityFirst + "\", \"name\" : \"Name speciality1\"}, " +
                 "\"2\" : {\"id\" : \"" + uuidSpecialitySecond + "\", \"name\" : \"Name speciality2\"}}}";
         try {
-            Subject subject = (Subject) serializer.fromJsonToEntity(jsonString, Subject.class);
+            subject = (Subject) serializer.fromJsonToEntity(jsonString, Subject.class);
             System.out.println("-----Subject Object from JSON------");
             System.out.println(subject);
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | InstantiationException |
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                 InstantiationException |
                  IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -130,10 +126,11 @@ public class Main {
                 "{\"id\" : \"" + uuidTeacherSecond + "\", \"lastName\" : \"Petrov\", \"firstName\" : \"Ivan\", " +
                 "\"phoneNumber\" : \"8-029-179-81-96\", \"birthday\" : \"1991-12-07\", \"single\" : true, \"experience\" :6}]}}";
         try {
-            Department department = (Department) serializer.fromJsonToEntity(jsonString, Department.class);
+            department = (Department) serializer.fromJsonToEntity(jsonString, Department.class);
             System.out.println("-----Department Object from JSON------");
             System.out.println(department);
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | InstantiationException |
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                 InstantiationException |
                  IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -148,10 +145,11 @@ public class Main {
                 "[{\"id\" : \"" + uuidTeacher + "\",\"lastName\" : \"Kechko\",\"firstName\" : \"Elena\",\"phoneNumber\" : " +
                 "\"8-029-179-81-96\",\"birthday\" : \"1991-12-07\",\"single\" : true,\"experience\" : 6}]}}]}";
         try {
-            Faculty faculty = (Faculty) serializer.fromJsonToEntity(jsonString, Faculty.class);
+            faculty = (Faculty) serializer.fromJsonToEntity(jsonString, Faculty.class);
             System.out.println("-----Faculty Object from JSON------");
             System.out.println(faculty);
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | InstantiationException |
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                 InstantiationException |
                  IllegalAccessException e) {
             throw new RuntimeException(e);
         }
