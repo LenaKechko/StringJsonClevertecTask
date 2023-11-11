@@ -7,6 +7,7 @@ import ru.clevertec.entity.Subject;
 import ru.clevertec.entity.Teacher;
 import ru.clevertec.util.MySerializer;
 import ru.clevertec.util.MySerializerImpl;
+import ru.clevertec.util.Validator;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
@@ -16,7 +17,6 @@ public class Main {
         UUID uuid = UUID.randomUUID();
         String jsonString = "{\"id\" :\"" + uuid +
                 "\", \"name\" : \"Name speciality\"}";
-
         MySerializer serializer = new MySerializerImpl();
 
         try {

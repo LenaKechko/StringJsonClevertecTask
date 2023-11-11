@@ -35,9 +35,13 @@ public class MySerializerImpl implements MySerializer {
 
     @Override
     public Object fromJsonToEntity(String json, Class<?> className) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        Map<String, Object> parseJson = getStringObjectMap(json);
-        if (className.getPackageName().equals("ru.clevertec.entity")) {
-            return makeMyEntity(parseJson, className);
+        if (Validator.isValidBrackets(json) && Validator.isValidQuote(json)) {
+            Map<String, Object> parseJson = getStringObjectMap(json);
+            if (className.getPackageName().equals("ru.clevertec.entity")) {
+                return makeMyEntity(parseJson, className);
+            } else {
+                returnValueByType((Type) className, json);
+            }
         }
         return null;
     }
