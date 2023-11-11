@@ -5,12 +5,14 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldNameConstants
 public class Subject {
     private UUID id;
     private String nameSubject;
-    private Map<Speciality, Integer> specialityWithNumberOfCourse;
+    private Map<Integer, Speciality> specialityWithNumberOfCourse;
 }
