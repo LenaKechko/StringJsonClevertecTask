@@ -1,6 +1,5 @@
 package ru.clevertec.util;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -49,6 +48,24 @@ class ValidatorTest {
         String jsonString = "{id\" :\"123\", \"name\" : \"Name speciality\"}";
 
         // when-then
-        assertTrue(Validator.isValidQuote(jsonString));
+        assertFalse(Validator.isValidQuote(jsonString));
+    }
+
+    @Test
+    void isValidColonShouldReturnTrue() {
+        //given
+        String jsonString = "{\"id\" :\"123\", \"name\" : \"Name speciality\"}";
+
+        // when-then
+        assertTrue(Validator.isValidColon(jsonString));
+    }
+
+    @Test
+    void isValidColonShouldReturnFalse() {
+        //given
+        String jsonString = "{\"id\"}";
+
+        // when-then
+        assertFalse(Validator.isValidColon(jsonString));
     }
 }
