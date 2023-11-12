@@ -1,16 +1,13 @@
 package ru.clevertec.util;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
-import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,8 +17,10 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class MySerializerImpl implements MySerializer {
+public class MyDeserializer {
+
     private static final Pattern pattern = Pattern.compile("(\"\\b\\w+\" ?: ?\"?[\\w. \\-,]+\\b\"?)" +
             "|(\"\\w+\" ?: ?\\[\\{[\\w \"\\-,:]+\\}])" +
             "|(\"\\w+\" ?: ?\\{[\\w \\-\",:]+\\})" +
@@ -31,106 +30,37 @@ public class MySerializerImpl implements MySerializer {
 
     private static final Pattern patternList = Pattern.compile("\\{[\\[\\](){}\\w= \\-\",:]+\\}");
 
-    @Override
-    public String fromEntityToJson(Object entity) {
-        StringBuilder jsonString = new StringBuilder("{");
-        Field[] fieldsOfEntity = entity.getClass().getDeclaredFields();
-        int countFields = fieldsOfEntity.length;
-        for (Field currentField : fieldsOfEntity) {
-            if (Modifier.isPrivate(currentField.getModifiers()))
-                currentField.setAccessible(true);
-            try {
-                String nameField = currentField.getName();
-                jsonString.append(String.format("\"%s\" : ", nameField));
-                Object valueField = currentField.get(entity);
-                jsonString.append(makeFormat(valueField));
-                countFields--;
-                if (countFields != 0) jsonString.append(",");
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-
-        }
-        jsonString.append("}");
-        return jsonString.toString();
-    }
-
-    public String makeFormat(Object obj) {
-        StringBuilder result = new StringBuilder();
-        if (checkInstanceCommonType(obj)) {
-            result.append(makeSimpleFormat(obj));
-        } else if (obj instanceof List) {
-            result.append(makeListFormat(obj));
-        } else if (obj instanceof Map) {
-            result.append(makeMapFormat(obj));
-        } else result.append(makeUserDataTypeFormat(obj));
-        return result.toString();
-    }
-
-    public String makeSimpleFormat(Object obj) {
-        StringBuilder jsonString = new StringBuilder();
-        if (obj instanceof Integer) {
-            jsonString.append(String.format("%d", (Integer) obj));
-        } else if (obj instanceof Double) {
-            jsonString.append(String.format("%.2f", (Double) obj));
-        } else if (obj instanceof Boolean) {
-            jsonString.append((Boolean) obj);
-        } else if (obj instanceof String || obj instanceof UUID || obj instanceof TemporalAccessor) {
-            jsonString.append(String.format("\"%s\"", obj));
-        }
-        return jsonString.toString();
-    }
-
-    public String makeMapFormat(Object obj) {
-        StringBuilder jsonStringResult = new StringBuilder();
-        jsonStringResult.append("{");
-        ((Map<?, ?>) obj).entrySet().stream()
-                .map(el -> {
-                    StringBuilder temp = new StringBuilder();
-                    Object key = el.getKey();
-                    Object value = el.getValue();
-                    temp.append("\"").append(key).append("\"");
-                    temp.append(" : ");
-                    temp.append(makeFormat(value));
-                    return temp;
-                })
-                .forEach(el -> jsonStringResult.append(el).append(","));
-        jsonStringResult.deleteCharAt(jsonStringResult.lastIndexOf(","));
-        jsonStringResult.append("}");
-        return jsonStringResult.toString();
-    }
-
-    public String makeListFormat(Object obj) {
-        StringBuilder jsonStringResult = new StringBuilder();
-        jsonStringResult.append("[");
-        ((List<?>) obj).stream()
-                .map(this::makeFormat)
-                .forEach(el -> jsonStringResult.append(el).append(","));
-        jsonStringResult.deleteCharAt(jsonStringResult.lastIndexOf(","));
-        jsonStringResult.append("]");
-        return jsonStringResult.toString();
-    }
-
-    public String makeUserDataTypeFormat(Object obj) {
-        return fromEntityToJson(obj);
-    }
-
-    public boolean checkInstanceCommonType(Object obj) {
-        return (obj instanceof Number || obj instanceof String || obj instanceof UUID
-                || obj instanceof TemporalAccessor || obj instanceof Boolean);
-    }
-
-    @Override
     public Object fromJsonToEntity(String json, Class<?> className) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        if (Validator.isValidBrackets(json) && Validator.isValidQuote(json)) {
+        if (Validator.isValidBrackets(json) && Validator.isValidQuote(json) && Validator.isValidColon(json)) {
             Map<String, Object> parseJson = getStringObjectMap(json);
             if (className.getPackageName().equals("ru.clevertec.entity")) {
                 return makeMyEntity(parseJson, className);
-            } else {
-                returnValueByType((Type) className, json);
+            } else if (className.getName().contains("Map")) {
+                return makeMap(parseJson, null);
+            }
+            if (className.getName().contains("List")) {
+                List<Object> parseJsonList = getStringObjectList(json);
+                Type typeList = checkTypeList(parseJsonList);
+                return makeList(parseJsonList, typeList);
             }
         }
         return null;
+    }
+
+    private static Type checkTypeList(List<Object> values) {
+        if (CheckType.isInteger(values)) {
+            return Integer.class;
+        }
+        if (CheckType.isDouble(values)) {
+            return Double.class;
+        }
+        if (CheckType.isBoolean(values)) {
+            return Boolean.class;
+        }
+        if (CheckType.isDate(values)) {
+            return LocalDate.class;
+        }
+        return String.class;
     }
 
     private static Map<String, Object> getStringObjectMap(String json) {
@@ -153,6 +83,13 @@ public class MySerializerImpl implements MySerializer {
         List<Object> parseJson = new ArrayList<>();
         while (matcher.find()) {
             parseJson.add(matcher.group());
+        }
+        if (parseJson.contains(json) || parseJson.isEmpty()) {
+            parseJson.clear();
+            json = json.substring(1, json.length() - 1);
+            parseJson = Stream.of(json.split(", "))
+                    .map(el -> el.replaceAll("\"", ""))
+                    .collect(Collectors.toList());
         }
         return parseJson;
     }
@@ -185,7 +122,8 @@ public class MySerializerImpl implements MySerializer {
                 ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public Object returnValueByType(Type type, Object value) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public Object returnValueByType(Type type, Object value) throws
+            InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         if (type instanceof ParameterizedType typeMap) {
             return returnValueByParametrizedType(typeMap, value);
         }
@@ -206,6 +144,7 @@ public class MySerializerImpl implements MySerializer {
             case "localdate" -> LocalDate.parse((String) value);
             case "offsetdatetime" -> OffsetDateTime.parse((String) value);
             case "zoneddatetime" -> ZonedDateTime.parse((String) value);
+            case "object" -> (Object) value;
             default -> null;
         };
     }
@@ -223,7 +162,8 @@ public class MySerializerImpl implements MySerializer {
         return null;
     }
 
-    public Object makeMyEntity(Map<String, Object> parseJson, Class<?> className) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public Object makeMyEntity(Map<String, Object> parseJson, Class<?> className) throws
+            NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Method[] methods = className.getMethods();
         List<Method> methodsList = Arrays.stream(methods).filter(method ->
                 (method.getName().startsWith("set")
@@ -252,10 +192,16 @@ public class MySerializerImpl implements MySerializer {
     }
 
     public Object makeMap(Map<String, Object> parseJson, ParameterizedType type) {
+        Type typeKey, typeValue;
+        if (type == null) {
+            typeKey = checkTypeList(new ArrayList<>(parseJson.keySet()));
+            typeValue = checkTypeList(parseJson.values().stream().toList());
+        } else {
+            typeKey = type.getActualTypeArguments()[0];
+            typeValue = type.getActualTypeArguments()[1];
+        }
         return parseJson.entrySet().stream()
                 .map(el -> {
-                    Type typeKey = type.getActualTypeArguments()[0];
-                    Type typeValue = type.getActualTypeArguments()[1];
                     try {
                         Object key = returnValueByType(typeKey, el.getKey());
                         Object value = returnValueByType(typeValue, el.getValue());

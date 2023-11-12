@@ -29,4 +29,10 @@ public class Validator {
         int countQuote = input.split("\"").length - 1;
         return (countQuote % 2 == 0);
     }
+
+    public static boolean isValidColon(String input) {
+        if (input.contains("{"))
+            return input.contains(":");
+        return true;
+    }
 }

@@ -5,8 +5,8 @@ import ru.clevertec.entity.Faculty;
 import ru.clevertec.entity.Speciality;
 import ru.clevertec.entity.Subject;
 import ru.clevertec.entity.Teacher;
+import ru.clevertec.util.MyDeserializer;
 import ru.clevertec.util.MySerializer;
-import ru.clevertec.util.MySerializerImpl;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -23,7 +23,7 @@ public class Main {
 
         //----сериализация----
         Speciality speciality = new Speciality(UUID.randomUUID(), "math");
-        MySerializer serializer = new MySerializerImpl();
+        MySerializer serializer = new MySerializer();
         String result = serializer.fromEntityToJson(speciality);
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -62,15 +62,17 @@ public class Main {
         System.out.println(result);
 
         //----десериализация----
+
+        MyDeserializer deserializer = new MyDeserializer();
         UUID uuid = UUID.randomUUID();
         String jsonString = "{\"id\" :\"" + uuid +
                 "\", \"name\" : \"Name speciality\"}";
 
         try {
-            speciality = (Speciality) serializer.fromJsonToEntity(jsonString, Speciality.class);
+            speciality = (Speciality) deserializer.fromJsonToEntity(jsonString, Speciality.class);
             System.out.println("-----Speciality Object from JSON------");
             System.out.println(speciality);
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+        } catch (NoSuchMethodException | InvocationTargetException |
                  InstantiationException |
                  IllegalAccessException e) {
             throw new RuntimeException(e);
@@ -85,10 +87,10 @@ public class Main {
                 "\"experience\" : 5}";
 
         try {
-            teacher = (Teacher) serializer.fromJsonToEntity(jsonString, Teacher.class);
+            teacher = (Teacher) deserializer.fromJsonToEntity(jsonString, Teacher.class);
             System.out.println("-----Teacher Object from JSON------");
             System.out.println(teacher);
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+        } catch (NoSuchMethodException | InvocationTargetException |
                  InstantiationException |
                  IllegalAccessException e) {
             throw new RuntimeException(e);
@@ -103,10 +105,10 @@ public class Main {
                 "{\"1\" : {\"id\" : \"" + uuidSpecialityFirst + "\", \"name\" : \"Name speciality1\"}, " +
                 "\"2\" : {\"id\" : \"" + uuidSpecialitySecond + "\", \"name\" : \"Name speciality2\"}}}";
         try {
-            subject = (Subject) serializer.fromJsonToEntity(jsonString, Subject.class);
+            subject = (Subject) deserializer.fromJsonToEntity(jsonString, Subject.class);
             System.out.println("-----Subject Object from JSON------");
             System.out.println(subject);
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+        } catch (NoSuchMethodException | InvocationTargetException |
                  InstantiationException |
                  IllegalAccessException e) {
             throw new RuntimeException(e);
@@ -126,10 +128,10 @@ public class Main {
                 "{\"id\" : \"" + uuidTeacherSecond + "\", \"lastName\" : \"Petrov\", \"firstName\" : \"Ivan\", " +
                 "\"phoneNumber\" : \"8-029-179-81-96\", \"birthday\" : \"1991-12-07\", \"single\" : true, \"experience\" :6}]}}";
         try {
-            department = (Department) serializer.fromJsonToEntity(jsonString, Department.class);
+            department = (Department) deserializer.fromJsonToEntity(jsonString, Department.class);
             System.out.println("-----Department Object from JSON------");
             System.out.println(department);
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+        } catch (NoSuchMethodException | InvocationTargetException |
                  InstantiationException |
                  IllegalAccessException e) {
             throw new RuntimeException(e);
@@ -145,10 +147,10 @@ public class Main {
                 "[{\"id\" : \"" + uuidTeacher + "\",\"lastName\" : \"Kechko\",\"firstName\" : \"Elena\",\"phoneNumber\" : " +
                 "\"8-029-179-81-96\",\"birthday\" : \"1991-12-07\",\"single\" : true,\"experience\" : 6}]}}]}";
         try {
-            faculty = (Faculty) serializer.fromJsonToEntity(jsonString, Faculty.class);
+            faculty = (Faculty) deserializer.fromJsonToEntity(jsonString, Faculty.class);
             System.out.println("-----Faculty Object from JSON------");
             System.out.println(faculty);
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+        } catch (NoSuchMethodException | InvocationTargetException |
                  InstantiationException |
                  IllegalAccessException e) {
             throw new RuntimeException(e);

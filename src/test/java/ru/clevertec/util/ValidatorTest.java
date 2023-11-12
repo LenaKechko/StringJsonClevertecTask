@@ -49,6 +49,24 @@ class ValidatorTest {
         String jsonString = "{id\" :\"123\", \"name\" : \"Name speciality\"}";
 
         // when-then
-        assertTrue(Validator.isValidQuote(jsonString));
+        assertFalse(Validator.isValidQuote(jsonString));
+    }
+
+    @Test
+    void isValidColonShouldReturnTrue() {
+        //given
+        String jsonString = "{\"id\" :\"123\", \"name\" : \"Name speciality\"}";
+
+        // when-then
+        assertTrue(Validator.isValidColon(jsonString));
+    }
+
+    @Test
+    void isValidColonShouldReturnFalse() {
+        //given
+        String jsonString = "{\"id\"}";
+
+        // when-then
+        assertFalse(Validator.isValidColon(jsonString));
     }
 }
