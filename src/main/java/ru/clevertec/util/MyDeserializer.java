@@ -144,7 +144,6 @@ public class MyDeserializer {
             case "localdate" -> LocalDate.parse((String) value);
             case "offsetdatetime" -> OffsetDateTime.parse((String) value);
             case "zoneddatetime" -> ZonedDateTime.parse((String) value);
-            case "object" -> (Object) value;
             default -> null;
         };
     }

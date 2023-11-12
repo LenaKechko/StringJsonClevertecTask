@@ -41,10 +41,7 @@ class MySerializerTest {
     @MethodSource("argsProviderList")
     void fromEntityToJsonShouldReturnStringByList(List<?> myList) throws JsonProcessingException, JSONException {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        boolean flag = false;
-        if (myList.get(0) instanceof TemporalAccessor) {
-            flag = true;
-        }
+        boolean flag = myList.get(0) instanceof TemporalAccessor;
 
         // given
         if (flag) {
